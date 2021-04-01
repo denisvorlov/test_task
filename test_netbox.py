@@ -6,6 +6,7 @@ import copy
 import pytest
 import mock
 from netbox import get_and_update_sw_version
+from libs import Device, DeviceParams
 from libs import Device, NB_Device, DeviceParams
 
 ALL_DEVICES = {NB_Device('11',

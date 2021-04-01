@@ -46,6 +46,13 @@ def get_and_update_sw_version(netbox_client: Api,
                                        primary_ip4=dev.primary_ip4["address"],
                                        platform_name=dev.platform["name"],
                                        sw_version=dev.custom_fields['sw_version']))
+        else:
+            fail_result.add(Device(dev.id, dev.name,
+                                   status=dev.status,
+                                   tenant=dev.tenant,
+                                   primary_ip4=dev.primary_ip4["address"],
+                                   platform_name=dev.platform["name"],
+                                   sw_version=dev.custom_fields['sw_version']))
     return ok_result, fail_result
 
 if __name__ == '__main__':
@@ -61,3 +68,4 @@ if __name__ == '__main__':
     RESULT = get_and_update_sw_version(NB_CLIENT,
                                        DeviceParams(status='active', tenant='noc'),
                                        SNMP_COMMUNITY, SNMP_SW_VERSION_OIDS)
+    

@@ -56,6 +56,7 @@ class Device:
             print(f'ERROR: {error}, '
                   f'while getting snmp data from {self.name} '
                   f'with ip {self.primary_ip4["address"]}')
+            return False
 
 class NB_Device:
     """dataclass for NB_Device (used in testing purposes)"""
