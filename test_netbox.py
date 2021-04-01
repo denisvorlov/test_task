@@ -1,21 +1,57 @@
 #!/usr/bin/python3
-"""netbox pytests"""
+# pylint: disable=W0621
+"""netbox pytests Denis Orlov 1.04.2021"""
 
 import copy
 import pytest
 import mock
-from netbox import get_netbox_devices, set_sw_version, DeviceParams
-from libs import NB_Device
+from netbox import get_and_update_sw_version
+from libs import Device, NB_Device, DeviceParams
 
-ALL_DEVICES = set([NB_Device('11', 'name1', 'active', 'noc', sw_version="sw_version1"),
-                   NB_Device('22', 'name2', 'not_active', 'noc', sw_version='sw_version1'),
-                   NB_Device('33', 'name3', 'active', 'not_noc', sw_version='sw_version1')])
+ALL_DEVICES = {NB_Device('11',
+                         'name1',
+                         'active',
+                         'noc',
+                         '192.168.10.5',
+                         'Cisco Catalyst IOS',
+                         sw_version="sw_version1"),
+               NB_Device('22',
+                         'name2',
+                         'not_active',
+                         'noc',
+                         '192.168.10.1',
+                         'Cisco NEXUS OS',
+                         sw_version='sw_version1'),
+               NB_Device('33',
+                         'name3',
+                         'active',
+                         'not_noc',
+                         '192.168.10.2',
+                         'Cisco ASA',
+                         sw_version='sw_version1')}
 
-ALL_CHANGED_DEVICES = set([NB_Device('11', 'name1', 'active', 'noc', sw_version='new_sw_version'),
-                           NB_Device('22', 'name2', 'active', 'noc', sw_version='new_sw_version'),
-                           NB_Device('33', 'name3', 'active', 'noc', sw_version='new_sw_version')])
+FILTERED_DEVICES = {NB_Device('11',
+                              'name1',
+                              'active',
+                              'noc',
+                              '192.168.10.5',
+                              'Cisco Catalyst IOS',
+                              sw_version="sw_version1")}
 
-FILTERED_DEVICES = set([NB_Device('11', 'name1', 'active', 'noc', sw_version="sw_version1")])
+CHANGED_DEVICE = {NB_Device('11',
+                            'name1',
+                            'active',
+                            'noc',
+                            '192.168.10.5',
+                            'Cisco Catalyst IOS',
+                            sw_version="test_sw_version1")}
+
+SNMP_COMMUNITY = 'public'
+SNMP_SW_VERSION_OIDS = {"Cisco Catalyst IOS": ".1.3.6.1.2.1.1.1.0",
+                        "Cisco Nexus OS": ".1.3.6.1.2.1.47.1.1.1.1.9",
+                        "Cisco ASA": ".1.3.6.1.2.1.47.1.1.1.1.9",
+                        "PaloAlto PAN-OS": "1.3.6.1.4.1.25461.2.1.2.1.1.0",
+                        "Aruba OS": ".1.3.6.1.2.1.47.1.1.1.1.9"}
 
 def nb_filter(device_list):
     """docstring description for nb_filter"""
@@ -34,12 +70,11 @@ def nb_client():
     client.dcim.devices.all.return_value = copy.deepcopy(ALL_DEVICES)
     return client
 
-def test_get_netbox_devices(nb_client):
-    """docstring description for test_get_netbox_devices"""
-    results = get_netbox_devices(nb_client, DeviceParams(status='active', tenant='noc'))
-    assert results == FILTERED_DEVICES
-
-def test_set_sw_version(nb_client):
+def test_get_and_update_sw_version(nb_client):
     """docstring description for test_set_sw_version"""
-    result = set_sw_version(nb_client, "my_new_sw_version")
-    assert result[0] == ALL_CHANGED_DEVICES
+    Device.get_snmp_oid = mock.Mock(return_value='test_sw_version')
+    result = get_and_update_sw_version(nb_client,
+                                       DeviceParams(status='active', tenant='noc'),
+                                       SNMP_COMMUNITY,
+                                       SNMP_SW_VERSION_OIDS)
+    assert result[0] == CHANGED_DEVICE
