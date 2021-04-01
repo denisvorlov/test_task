@@ -6,7 +6,6 @@ import copy
 import pytest
 import mock
 from netbox import get_and_update_sw_version
-from libs import Device, DeviceParams
 from libs import Device, NB_Device, DeviceParams
 
 ALL_DEVICES = {NB_Device('11',
@@ -67,7 +66,7 @@ def nb_filter(device_list):
 def nb_client():
     """docstring description for nb_client"""
     client = mock.Mock()
-    client.dcim.devices.filter.return_value = nb_filter(ALL_DEVICES)
+    client.dcim.devices.filter.return_value = nb_filter(copy.deepcopy(ALL_DEVICES))
     client.dcim.devices.all.return_value = copy.deepcopy(ALL_DEVICES)
     return client
 

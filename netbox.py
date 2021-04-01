@@ -68,4 +68,3 @@ if __name__ == '__main__':
     RESULT = get_and_update_sw_version(NB_CLIENT,
                                        DeviceParams(status='active', tenant='noc'),
                                        SNMP_COMMUNITY, SNMP_SW_VERSION_OIDS)
-    
